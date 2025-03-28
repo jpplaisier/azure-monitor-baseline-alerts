@@ -34,15 +34,24 @@ Foreach($AVDHostPool in $AVDHostPools){
     $HPUsrDisonnected = ($HPUsrSessions | Where-Object {$_.sessionState -eq "Disconnected" -AND $_.userPrincipalName -ne $null}).count
     $HPUsrActive = ($HPUsrSessions | Where-Object {$_.sessionState -eq "Active" -AND $_.userPrincipalName -ne $null}).count
     If($HPType -eq "Personal"){
-        $HPPerUnhlthy = $HPSessionHosts | Where-Object {$_.AssignedUser -ne $null -AND $_.Status -ne "Available"}
-        $HPNumPerUnhlthy = $HPPerUnhlthy.count
-        $HostList = New-Object PSObject
-        foreach($item in $HPPerUnhlthy){
-            $HostList | Add-Member -Type NoteProperty -Name SessionHost -Value ($item.name -split '/')[1]
-            $HostList | Add-Member -Type NoteProperty -Name AssignedUser -Value $item.AssignedUser
-            }
-        $HPPerHostUnhlthy = $HostList | ConvertTo-Json
+        $HPPerUnhlthy = $HPSessionHosts | Where-Object {
+            $_.AssignedUser -ne $null -AND $_.Status -ne "Available" -AND $_.Status -ne "Unavailable" -AND $_.Status -ne "Shutdown"
         }
+        $HPNumPerUnhlthy = $HPPerUnhlthy.count
+    
+        # Create an array to hold multiple host objects
+        $HostList = @()
+    
+        foreach($item in $HPPerUnhlthy){
+            $HostObject = [PSCustomObject]@{
+                SessionHost   = ($item.name -split '/')[1]
+                AssignedUser  = $item.AssignedUser
+            }
+            $HostList += $HostObject
+        }
+    
+        $HPPerHostUnhlthy = $HostList | ConvertTo-Json -Depth 2
+    }
    
     #Adding number of hosts available and allowing sessions, and Host Pool resource ID
     $HP_ResID = $AVDHostPool.Id
