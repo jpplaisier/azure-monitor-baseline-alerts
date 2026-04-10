@@ -44,7 +44,7 @@ foreach ($AVDHostPool in $AVDHostPools) {
 
     # Guard against division by zero when no hosts are available and allowing sessions
     if ($TotalCapacity -gt 0) {
-        $HPLoadPercent = [Math]::Round(($HPUsrSession / $TotalCapacity) * 100, 1)
+        $HPLoadPercent = [Math]::Round(($HPUsrSession / $TotalCapacity) * 100)
     }
     else {
         $HPLoadPercent = 0
@@ -55,7 +55,7 @@ foreach ($AVDHostPool in $AVDHostPools) {
 
     # Guard against division by zero when no hosts are available and allowing sessions
     if ($HPUsrSession -ne 0 -and $HPNumHostsAvailableAndAllowingSessions -ne 0) {
-        $HPLoadPercent = ($HPUsrSession / $TotalCapacity) * 100
+        $HPLoadPercent = [Math]::Round(($HPUsrSession / $TotalCapacity) * 100)
     }
     else {
         $HPLoadPercent = 0
